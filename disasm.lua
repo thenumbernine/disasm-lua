@@ -1,5 +1,7 @@
+local assert = require 'ext.assert'
 local class = require 'ext.class'
 local table = require 'ext.table'
+
 
 local Disasm = class()
 
