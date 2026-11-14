@@ -80,8 +80,8 @@ function Trace:readAndInc(ctype)
 	ctype = ffi.typeof(ctype)
 	local ptrtype = ffi.typeof('$*', ctype)
 
-	assert.lt(self.pc, disasm.len)
-	local o = ffi.cast(ptrtype, disasm.data + self.pc)[0]
+	assert.lt(self.pc, self.disasm.len)
+	local o = ffi.cast(ptrtype, self.disasm.data + self.pc)[0]
 	self.pc = self.pc + ffi.sizeof(ctype)
 
 	return self:getValue(o, ctype)
@@ -260,19 +260,8 @@ print(('BEGIN '..disasm:addrLabel(self.addr))
 --]==]
 
 	while true do
-		if not (
-			(scriptBaseAddr <= self.pc and self.pc < scriptBaseAddrEnd)
-			or (scriptBaseAddr2 <= self.pc and self.pc < scriptBaseAddrEnd2)
-			or (battleEventScriptAddr <= self.pc and self.pc < battleEventScriptAddrEnd)
-			or (monsterScriptAddr <= self.pc and self.pc < monsterScriptAddrEnd)
-			or (battleAnimScriptAddr <= self.pc and self.pc < battleAnimScriptAddrEnd)
-		) then
-print('!!! script oob !!! '..disasm:addrLabel(self.pc))
-			break
-		end
-
 		local cmdobj = self:readNext()
-		if cmdobj.endTrace then break end
+		if not cmdobj or cmdobj.endTrace then break end
 	end
 
 	-- set this before trying recursive, so they know this trace's address interval

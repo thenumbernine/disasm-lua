@@ -42,7 +42,7 @@ function Disasm:done()
 	self.eventScriptCmds:sort(function(a,b) return a.addr < b.addr end)
 
 -- [=[ remove subsets
-	local sortedTraces = table.values(decompileTraces)
+	local sortedTraces = table.values(self.decompileTraces)
 	sortedTraces:sort(function(a,b) return a.addr < b.addr end)
 	for i=#sortedTraces-1,1,-1 do
 		local a = sortedTraces[i]
@@ -75,7 +75,7 @@ function Disasm:done()
 			end
 			if allmatch then
 --DEBUG:print('removing subset trace '..self:addrLabel(b.addr)..' - '..self:addrLabel(b.endAddr))
-				decompileTraces[b.addr] = nil
+				self.decompileTraces[b.addr] = nil
 				sortedTraces:remove(i+1)
 			end
 		end
@@ -83,7 +83,7 @@ function Disasm:done()
 --]=]
 
 	-- double-check collisions
-	local sortedTraces = table.values(decompileTraces)
+	local sortedTraces = table.values(self.decompileTraces)
 	sortedTraces:sort(function(a,b) return a.addr < b.addr end)
 	for i=2,#sortedTraces do
 		local a = sortedTraces[i-1]
@@ -92,8 +92,6 @@ function Disasm:done()
 			print('!!! collision detected between '..a:printInterval()..' and '..b:printInterval())
 		end
 	end
-
-	self.decompileTraces = decompileTraces
 
 	-- calculate eventScriptCmdIndexForAddr
 	-- and remove duplicates
