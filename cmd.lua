@@ -35,7 +35,7 @@ function Cmd:__tostring()
 	if self.descstr then return self.descstr end
 
 	if type(self.desc) ~= 'string' then
-		error("for cmdset="..tostring(self.classCmdSet)..' cmd='..tostring(self.cmd).." __tostring failed to find self.desc")
+		error("for cmdset="..tostring(self.classCmdSet)..' cmd='..tostring(self.cmd).." __tostring failed to find self.desc, got type "..type(self.desc))
 	end
 
 	assert.eq(self.self, nil)
