@@ -176,6 +176,10 @@ print((tostring(cmdobj)
 	if cmdobj.getBranchAddrs then
 		-- decode branches ... now or later?
 		for _,newBranch in ipairs(cmdobj:getBranchAddrs()) do
+if not newBranch.addr then
+	io.stderr:write(("cmdset %s cmd 0x%02x at _%06x had :getBranchAddrs() missing an .addr"):format(cmdset, cmdobj.cmd, self.pc), '\n')
+	error(tostring(cmdobj))
+end
 			newBranch.cmdset = newBranch.cmdset or self.stateStack[1].cmdset		-- make sure we record the current cmdset
 			newBranch.inVehicle = self.stateStack:last().cmdset == 'VehicleCmds'	-- right now self.stateStack is just 1 or 2 in size, and 2 is always VehicleCmds, and 1 is always not...
 			newBranch.lastDialogPromptCount = self.lastDialogPromptCount
@@ -267,11 +271,14 @@ print()
 	end
 
 	for _,newBranch in ipairs(self.newBranches) do
+assert.index(newBranch, 'addr')
 		local trace = disasm:trace(newBranch)
-
+assert.index(trace, 'addr')
 		-- [[ why can't I just do this in Trace:run?
 		-- because I only should do this when the previous cmdset was different
 		if startCmdSet ~= 'BattleAnimCmds'
+		-- TODO ... but we do want it from BattleEventCmds to BattleAnimCmds upon allCharAnims
+		-- ... but we don't want it from BattleEventCmds to BattleAnimCmds upon charAnim or monsterAnim
 		and newBranch.cmdset == 'BattleAnimCmds'
 		then
 			trace:readInstr(trace.pc, newBranch.cmdset, 'SpeedAndAlign')
