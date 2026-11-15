@@ -166,11 +166,6 @@ io.write(align(
 			return ('%02x '):format(b:byte())
 		end)
 ))
-if disasm.ObjectCmd:isa(cmdobj)
-and not disasm.ObjectCmds.EndScript:isa(cmdobj)
-then
-	io.write'    '
-end
 print((tostring(cmdobj)
 	:gsub('\t', '\\t')
 	:gsub('\r', '\\r')
@@ -224,16 +219,6 @@ end
 function Trace:run()
 	local disasm = self.disasm
 	local startCmdSet = self.stateStack:last().cmdset
-
-	--[[ special-case always for BattleAnimCmds,
-	-- whether starting from disasm.battleAnimScriptOffsets[]
-	-- or from BattleEventCmds.AllCharsAnim branches...
-	-- ... always use first 2 bytes as a special instruction
-	-- why is it messing things up later?
-	if startCmdSet == 'BattleAnimCmds' then
-		self:readInstr(self.pc, startCmdSet, 'SpeedAndAlign')
-	end
-	--]]
 
 	-- make sure we haven't decoded this already
 	for _,otherTrace in pairs(disasm.decompileTraces) do

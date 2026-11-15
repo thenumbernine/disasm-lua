@@ -19,6 +19,9 @@ function Disasm:init(data, len)
 	-- remember where we've started from so we don't go over the same area twice
 	-- TODO this but for the state of decoding as well
 	self.decompileTraces = {}
+
+	self.labelsForAddr = {}
+	self.commentsForAddr = {}
 end
 
 function Disasm:trace(args, ...)
@@ -32,7 +35,19 @@ function Disasm:trace(args, ...)
 end
 
 function Disasm:addrLabel(addr)
+	local builtin = self.labelsForAddr[addr]
+	if builtin then return builtin[1] end
 	return ('_%06x'):format(addr)
+end
+
+function Disasm:addLabel(addr, name)
+	self.labelsForAddr[addr] = self.labelsForAddr[addr] or table()
+	self.labelsForAddr[addr]:insert(name)
+end
+
+function Disasm:addComment(addr, str)
+	self.commentsForAddr[addr] = self.commentsForAddr[addr] or table()
+	self.commentsForAddr[addr]:insert(str)
 end
 
 --[[
@@ -137,34 +152,6 @@ function Disasm:done()
 			end
 		end
 	end
-
-	-- addr -> cmd
-	local cmdForAddr = {}
-	for _,cmdobj in ipairs(self.eventScriptCmds) do
-		cmdForAddr[cmdobj.addr] = cmdobj
-	end
-
-	for _,cmdobj in ipairs(self.eventScriptCmds) do
-		if self.ObjectCmds.Branch:isa(cmdobj) then
-			local destAddr = cmdobj:getDestAddr()
-			if destAddr then
-				self.whatsPointingToAddr[destAddr] = self.whatsPointingToAddr[destAddr] or table()
-				local destCmdObj = cmdForAddr[destAddr]
-				if not destCmdObj then
-print("!!! WARNING !!!! branch from "
-	..('_%06x'):format(cmdobj.addr)
-	..' to unknown location '
-	..('_%06x'):format(destAddr))
-				end
-				self.whatsPointingToAddr[destAddr]:insert{
-					cmdobj = cmdobj,
-					branchFromAddr = cmdobj.addr,
-					cmdset = cmdobj.cmdset,
-				}
-			end
-		end
-	end
-
 end
 
 return Disasm
