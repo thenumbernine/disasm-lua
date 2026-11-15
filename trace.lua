@@ -42,8 +42,16 @@ serializeForType = {
 },
 }))
 --]==]
+	-- hmm seems you gotta always add an entry to the function start in order for the labels at that location to work,
+	-- even if there is no reverseRefInfo object entering into the trace.
 	disasm.whatsPointingToAddr[self.addr] = disasm.whatsPointingToAddr[self.addr] or table()
-	disasm.whatsPointingToAddr[self.addr]:insert(reverseRefInfo)
+	if reverseRefInfo then
+		disasm.whatsPointingToAddr[self.addr]:insert(reverseRefInfo)
+
+		if reverseRefInfo.builtin then
+			self.disasm:addLabel(self.addr, reverseRefInfo.builtin)
+		end
+	end
 
 	self.cmds = table()
 	self.cmdObjForAddr = {}	-- keys are cmds[i].addr
